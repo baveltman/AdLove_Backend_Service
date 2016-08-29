@@ -1,0 +1,33 @@
+{
+	"ImportPath": "AdLove_Backend_Service",
+	"GoVersion": "go1.5",
+	"GodepVersion": "v74",
+	"Deps": [
+		{
+			"ImportPath": "github.com/gorilla/context",
+			"Comment": "v1.1-7-g08b5f42",
+			"Rev": "08b5f424b9271eedf6f9f0ce86cb9396ed337a42"
+		},
+		{
+			"ImportPath": "github.com/gorilla/mux",
+			"Comment": "v1.1-24-g0b13a92",
+			"Rev": "0b13a922203ebdbfd236c818efcd5ed46097d690"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context",
+			"Rev": "6250b412798208e6c90b03b7c4f226de5aa299e2"
+		},
+		{
+			"ImportPath": "golang.org/x/net/context/ctxhttp",
+			"Rev": "6250b412798208e6c90b03b7c4f226de5aa299e2"
+		},
+		{
+			"ImportPath": "googlemaps.github.io/maps",
+			"Rev": "60e503aa5764e42e2c7fd69ef70022977b386a83"
+		},
+		{
+			"ImportPath": "googlemaps.github.io/maps/internal",
+			"Rev": "60e503aa5764e42e2c7fd69ef70022977b386a83"
+		}
+	]
+}
