@@ -2,14 +2,24 @@
 	"ImportPath": "AdLove_Backend_Service",
 	"GoVersion": "go1.7",
 	"GodepVersion": "v74",
-	"Packages": [
-		"./..."
-	],
 	"Deps": [
+		{
+			"ImportPath": "github.com/JustinBeckwith/go-yelp/yelp",
+			"Rev": "2228f91f3d151c1cd01f8e916b5cc89741b6ac92"
+		},
+		{
+			"ImportPath": "github.com/JustinBeckwith/oauth",
+			"Rev": "a1577bd3870218dc30725a7cf4655e9917e3751b"
+		},
 		{
 			"ImportPath": "github.com/gorilla/mux",
 			"Comment": "v1.1-24-g0b13a92",
 			"Rev": "0b13a922203ebdbfd236c818efcd5ed46097d690"
+		},
+		{
+			"ImportPath": "github.com/guregu/null",
+			"Comment": "v3.1",
+			"Rev": "41961cea0328defc5f95c1c473f89ebf0d1813f6"
 		},
 		{
 			"ImportPath": "golang.org/x/net/context",
