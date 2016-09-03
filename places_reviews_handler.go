@@ -11,7 +11,7 @@ import (
 	"github.com/JustinBeckwith/go-yelp/yelp"
 )
 
-func getYelpDetails(placeName string) (yelp.Business, error){
+func getYelpDetails(placeName string, location string) (yelp.Business, error){
 	var err error
 	
 	options, err := getClientOptions()
@@ -21,12 +21,23 @@ func getYelpDetails(placeName string) (yelp.Business, error){
 	
 	client := yelp.New(options, nil)
 	
-	resp, err := client.GetBusiness(placeName)
+	resp, err := client.DoSimpleSearch(placeName, location)
 	if err != nil {
 		return yelp.Business{}, err
 	}
 	
-	return resp, nil
+	if len(resp.Businesses) < 1{
+		return yelp.Business{}, nil
+	}
+	
+	var buisId string = resp.Businesses[0].ID
+	
+	buisData, err := client.GetBusiness(buisId)
+	if err != nil {
+		return yelp.Business{}, err
+	}
+	
+	return buisData, nil
 }
 
 func getGoogleDetails(placeId string) (maps.PlaceDetailsResult, error) {
@@ -84,7 +95,7 @@ func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	
 	//get yelp details
 	var yelpData yelp.Business
-	yelpData, err = getYelpDetails(googleData.Name)
+	yelpData, err = getYelpDetails(googleData.Name, googleData.FormattedAddress)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
 	    return
