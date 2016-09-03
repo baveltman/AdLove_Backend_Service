@@ -19,9 +19,16 @@ var routes = Routes{
 		IndexHandler,
 	},
 	Route{
+		"PlacesReviews",
+		"GET",
+		"/reviews/{placeId}",
+		PlacesReviewsHandler,
+	},
+	Route{
 		"PlacesSearch",
 		"GET",
 		"/places",
 		PlacesSearchHandler,
 	},
+	
 }

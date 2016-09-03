@@ -1,4 +1,3 @@
-
 package main
 
 import (
@@ -7,19 +6,24 @@ import (
 	"net/http"
 	"googlemaps.github.io/maps"
 	"golang.org/x/net/context"
+	"github.com/gorilla/mux"
 )
 
-func PlacesSearchHandler(w http.ResponseWriter, r *http.Request) {
-	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 
-	search := r.URL.Query().Get(Search)
+func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
+	w.Header().Set("Content-Type", "application/json; charset=UTF-8")
 	
-	if search == "" {
-		http.Error(w, "Missing search", http.StatusBadRequest)
+	vars := mux.Vars(r)
+	
+	placeId := vars[PlaceId]
+	
+	
+	if placeId == "" {
+		http.Error(w, "Missing placeId", http.StatusBadRequest)
 		return
 	}
 	
-	if search != "" {
+	if placeId != "" {
 		var client *maps.Client
 		var err error
 		
@@ -37,11 +41,11 @@ func PlacesSearchHandler(w http.ResponseWriter, r *http.Request) {
 		    return
 		}
 		
-		searchRequest := &maps.PlaceAutocompleteRequest{
-			Input:    search,
+		searchRequest := &maps.PlaceDetailsRequest{
+			PlaceID: placeId,
 		}
 		
-		resp, err := client.PlaceAutocomplete(context.Background(), searchRequest)
+		resp, err := client.PlaceDetails(context.Background(), searchRequest)
 		
 		if err != nil {
 			http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -49,6 +53,7 @@ func PlacesSearchHandler(w http.ResponseWriter, r *http.Request) {
 		}
 		
 		js, err := json.Marshal(resp)
+	  
 	  if err != nil {
 	    http.Error(w, err.Error(), http.StatusInternalServerError)
 	    return
