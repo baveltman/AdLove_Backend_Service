@@ -1,6 +1,7 @@
 package main
 
 import (
+	"errors"
 	"os"
 	"encoding/json"
 	"net/http"
@@ -8,6 +9,35 @@ import (
 	"golang.org/x/net/context"
 	"github.com/gorilla/mux"
 )
+
+func getGoogleDetails(placeId string) (maps.PlaceDetailsResult, error) {
+	var client *maps.Client
+	var err error
+	
+	var placesApiKey = os.Getenv(PlacesApiKey)
+	if placesApiKey == ""{
+		return maps.PlaceDetailsResult{}, errors.New("Missing Google Places Api Key")
+	}
+	
+	//TODO: change this to env var
+	client, err = maps.NewClient(maps.WithAPIKey(placesApiKey))
+	
+	if err != nil{
+		return maps.PlaceDetailsResult{}, err
+	}
+	
+	searchRequest := &maps.PlaceDetailsRequest{
+		PlaceID: placeId,
+	}
+	
+	resp, err := client.PlaceDetails(context.Background(), searchRequest)
+	
+	if err != nil {
+		return maps.PlaceDetailsResult{}, err 
+	}
+	
+	return resp, nil
+}
 
 
 func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
@@ -23,46 +53,25 @@ func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 	
-	if placeId != "" {
-		var client *maps.Client
-		var err error
-		
-		var placesApiKey = os.Getenv(PlacesApiKey)
-		if placesApiKey == ""{
-			http.Error(w, "Missing Google Places Api Key", http.StatusInternalServerError)
-		    return
-		}
-		
-		//TODO: change this to env var
-		client, err = maps.NewClient(maps.WithAPIKey(placesApiKey))
-		
-		if err != nil{
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		    return
-		}
-		
-		searchRequest := &maps.PlaceDetailsRequest{
-			PlaceID: placeId,
-		}
-		
-		resp, err := client.PlaceDetails(context.Background(), searchRequest)
-		
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusInternalServerError)
-		    return
-		}
-		
-		js, err := json.Marshal(resp)
-	  
-	  if err != nil {
-	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	var resp PlaceReviewsResult
+	
+	googleData, err := getGoogleDetails(placeId)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
 	    return
-	  }
-	  
-	  w.WriteHeader(http.StatusOK)
-	  w.Write(js)
-
 	}
 	
+	resp.GoogleData = googleData
+
+	//return response as json
+	js, err := json.Marshal(resp)
+	  
+	if err != nil {
+	    http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
+	}
+	
+	w.WriteHeader(http.StatusOK)
+	w.Write(js)
 	
 }
