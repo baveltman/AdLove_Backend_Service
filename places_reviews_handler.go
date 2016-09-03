@@ -8,7 +8,26 @@ import (
 	"googlemaps.github.io/maps"
 	"golang.org/x/net/context"
 	"github.com/gorilla/mux"
+	"github.com/JustinBeckwith/go-yelp/yelp"
 )
+
+func getYelpDetails(placeName string) (yelp.Business, error){
+	var err error
+	
+	options, err := getClientOptions()
+	if err != nil {
+		return yelp.Business{}, err
+	}
+	
+	client := yelp.New(options, nil)
+	
+	resp, err := client.GetBusiness(placeName)
+	if err != nil {
+		return yelp.Business{}, err
+	}
+	
+	return resp, nil
+}
 
 func getGoogleDetails(placeId string) (maps.PlaceDetailsResult, error) {
 	var client *maps.Client
@@ -19,7 +38,6 @@ func getGoogleDetails(placeId string) (maps.PlaceDetailsResult, error) {
 		return maps.PlaceDetailsResult{}, errors.New("Missing Google Places Api Key")
 	}
 	
-	//TODO: change this to env var
 	client, err = maps.NewClient(maps.WithAPIKey(placesApiKey))
 	
 	if err != nil{
@@ -54,7 +72,8 @@ func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	var resp PlaceReviewsResult
-	
+	var googleData maps.PlaceDetailsResult
+	//get google details
 	googleData, err := getGoogleDetails(placeId)
 	if err != nil {
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -62,6 +81,15 @@ func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	}
 	
 	resp.GoogleData = googleData
+	
+	//get yelp details
+	var yelpData yelp.Business
+	yelpData, err = getYelpDetails(googleData.Name)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
+	}
+	resp.YelpData = yelpData
 
 	//return response as json
 	js, err := json.Marshal(resp)
