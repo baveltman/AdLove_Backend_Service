@@ -5,16 +5,59 @@ import (
 	"os"
 	"encoding/json"
 	"net/http"
+	"net/url"
+	"strconv"
+	
 	"googlemaps.github.io/maps"
 	"golang.org/x/net/context"
 	"github.com/gorilla/mux"
 	"github.com/JustinBeckwith/go-yelp/yelp"
+	"github.com/peppage/foursquarego"
 )
+
+const FIVE_MILES_IN_METERS = "8046.72";
+
+func getFoursquareDetails(placeName string, lat float64, lng float64) (foursquarego.Venue, error) {
+	var err error
+	var api *foursquarego.FoursquareApi
+	
+	options, err := getFoursquareClientOptions()
+	if err != nil {
+		return foursquarego.Venue{}, err
+	}
+	
+	api = foursquarego.NewFoursquareApi(options.ClientId, options.ClientSecret)
+	
+	uv := url.Values{}
+	var latStr string = strconv.FormatFloat(lat, 'f', 6, 64)
+	var lngStr string = strconv.FormatFloat(lng, 'f', 6, 64)
+	
+	uv.Set("ll", latStr + "," + lngStr)
+	uv.Set("query", placeName)
+	uv.Set("radius", FIVE_MILES_IN_METERS)
+	
+	venues, err := api.Search(uv)
+	if err != nil{
+		return foursquarego.Venue{}, err
+	}
+	
+	if len(venues) < 1 {
+		return foursquarego.Venue{}, nil
+	}
+	
+	venue, err := api.GetVenue(venues[0].ID)
+	if err != nil {
+		return foursquarego.Venue{}, nil
+	}
+	
+	return venue, nil
+	
+}
 
 func getYelpDetails(placeName string, location string) (yelp.Business, error){
 	var err error
 	
-	options, err := getClientOptions()
+	options, err := getYelpClientOptions()
 	if err != nil {
 		return yelp.Business{}, err
 	}
@@ -101,6 +144,18 @@ func PlacesReviewsHandler(w http.ResponseWriter, r *http.Request) {
 	    return
 	}
 	resp.YelpData = yelpData
+	
+	//get Foursquare details
+	var foursquareData foursquarego.Venue
+	var lat float64 = googleData.Geometry.Location.Lat
+	var lng float64 = googleData.Geometry.Location.Lng
+	foursquareData, err = getFoursquareDetails(googleData.Name, lat, lng)
+	if err != nil {
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+	    return
+	}
+	
+	resp.FoursquareData = foursquareData
 
 	//return response as json
 	js, err := json.Marshal(resp)

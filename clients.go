@@ -6,7 +6,26 @@ import (
 	"github.com/JustinBeckwith/go-yelp/yelp"
 )
 
-func getClientOptions() (*yelp.AuthOptions, error) {
+func getFoursquareClientOptions() (*FoursquareOauthOptions, error) {
+	var o *FoursquareOauthOptions
+	
+	o = &FoursquareOauthOptions{
+		ClientId:		os.Getenv(FoursquareClientId),
+		ClientSecret:	os.Getenv(FoursquareClientSecret), 
+	}
+	
+	if o.ClientId == "" {
+		return o, errors.New("Missing Foursquare Client Id")
+	}
+	
+	if o.ClientSecret == "" {
+		return o, errors.New("Missing Foursquare Client Secret")
+	}
+	
+	return o, nil
+}
+
+func getYelpClientOptions() (*yelp.AuthOptions, error) {
 	var o *yelp.AuthOptions
 	
 	o = &yelp.AuthOptions{
