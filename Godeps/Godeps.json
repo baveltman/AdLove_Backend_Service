@@ -22,6 +22,10 @@
 			"Rev": "41961cea0328defc5f95c1c473f89ebf0d1813f6"
 		},
 		{
+			"ImportPath": "github.com/peppage/foursquarego",
+			"Rev": "d241045b317aae8aeed05d47c3b2ab1e19a52987"
+		},
+		{
 			"ImportPath": "golang.org/x/net/context",
 			"Rev": "6250b412798208e6c90b03b7c4f226de5aa299e2"
 		},
